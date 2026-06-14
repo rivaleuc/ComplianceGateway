@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Toaster, toast } from 'sonner'
-import { read, write, CONTRACT } from './genlayer'
+import { read, write, CONTRACT, connectWallet, isWalletConnected } from './genlayer'
 
 type Risk = 'low' | 'medium' | 'high'
 type LogEntry = {
@@ -78,6 +78,17 @@ export default function App() {
   const logRef = useRef<HTMLDivElement>(null)
   const idRef = useRef(100)
   const [stats, setStats] = useState<{ total: number; blocked: number } | null>(null)
+  const [walletAddr, setWalletAddr] = useState<string | null>(null)
+
+  async function handleConnect() {
+    try {
+      const a = await connectWallet()
+      setWalletAddr(a.slice(0, 6) + '…' + a.slice(-4))
+      toast.success('Wallet connected')
+    } catch (e: any) {
+      toast.error(e.message || 'Connect failed')
+    }
+  }
 
   const total = stats?.total ?? log.length
   const blocked = stats?.blocked ?? log.filter((l) => l.risk === 'high').length
@@ -185,6 +196,16 @@ export default function App() {
             <span className="hidden rounded border border-zinc-700 px-2 py-1 sm:inline">
               {CONTRACT.slice(0, 8)}…{CONTRACT.slice(-6)}
             </span>
+            <button
+              onClick={handleConnect}
+              className={`rounded border px-2 py-1 font-mono uppercase tracking-wider transition ${
+                isWalletConnected()
+                  ? 'border-teal-500/60 bg-teal-500/10 text-teal-300'
+                  : 'border-zinc-700 text-zinc-300 hover:border-teal-500/70 hover:text-teal-300'
+              }`}
+            >
+              {walletAddr ? `● ${walletAddr}` : 'Connect Wallet'}
+            </button>
           </div>
         </header>
 
