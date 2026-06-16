@@ -102,20 +102,43 @@ Reply ONLY valid JSON:
 No markdown, no code fences."""
 
             raw = gl.nondet.exec_prompt(prompt, response_format="json")
-            if isinstance(raw, dict):
-                return json.dumps(raw)
-            return str(raw).strip()
+            data = raw if isinstance(raw, dict) else json.loads(str(raw).strip())
+
+            # Deterministic anchor: normalize risk_level, then DERIVE is_compliant
+            # from it so honest leaders always satisfy the validator invariant.
+            risk_level = str(data.get("risk_level", "")).strip().lower()
+            if risk_level not in ("low", "medium", "high"):
+                risk_level = "high"  # fail closed on garbage
+            reasoning = str(data.get("reasoning", "")).strip()
+            if not reasoning:
+                reasoning = "no reasoning provided"
+            normalized = {
+                "is_compliant": (risk_level == "low"),
+                "risk_level": risk_level,
+                "reasoning": reasoning,
+                "source": str(data.get("source", "OFAC_SDN")).strip() or "OFAC_SDN",
+            }
+            return json.dumps(normalized)
 
         def validator_fn(leader_result) -> bool:
             if not isinstance(leader_result, gl.vm.Return):
                 return False
             try:
                 data = json.loads(leader_result.calldata)
-                if not isinstance(data.get("is_compliant"), bool):
+                risk_level = data.get("risk_level")
+                if risk_level not in ("low", "medium", "high"):
                     return False
-                if data.get("risk_level") not in ("low", "medium", "high"):
+                is_compliant = data.get("is_compliant")
+                # int is a subclass of bool in Python only the other way; guard
+                # against ints/strings masquerading as the boolean field.
+                if not isinstance(is_compliant, bool):
                     return False
-                if not isinstance(data.get("reasoning"), str):
+                # Deterministic cross-field invariant (the ANCHOR):
+                # compliant iff risk is low. No free-form text comparison.
+                if is_compliant != (risk_level == "low"):
+                    return False
+                reasoning = data.get("reasoning")
+                if not isinstance(reasoning, str) or not reasoning.strip():
                     return False
                 return True
             except Exception:

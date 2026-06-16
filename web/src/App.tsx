@@ -18,12 +18,8 @@ const RISK_META: Record<Risk, { label: string; color: string; ring: string; arc:
   high: { label: 'BLOCKED', color: '#EF4444', ring: 'text-red-500', arc: 0.92, glow: 'rgba(239,68,68,0.55)' },
 }
 
-const SEED: LogEntry[] = [
-  { id: 1, address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F', risk: 'low', ts: '21:04:11', reason: 'No OFAC match · clean trail' },
-  { id: 2, address: '0x000000000000000000000000000000000000dEaD', risk: 'high', ts: '21:03:47', reason: 'SDN list hit · sanctioned entity' },
-  { id: 3, address: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B', risk: 'medium', ts: '21:01:09', reason: 'Indirect exposure · 2 hops to flagged' },
-  { id: 4, address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', risk: 'low', ts: '20:58:32', reason: 'No OFAC match · verified counterparty' },
-]
+// Screening log starts empty; real verdicts populate it as `screen` finalizes on-chain.
+const SEED: LogEntry[] = []
 
 function Gauge({ risk, scanning }: { risk: Risk | null; scanning: boolean }) {
   const meta = risk ? RISK_META[risk] : null

@@ -4,8 +4,8 @@
 
 ComplianceGateway screens a subject (a name or blockchain address) against live OFAC sanctions data and produces a compliance verdict by validator consensus. An EVM vault locks the transfer and releases it only when the GenLayer verdict says "compliant" — so the money never moves on an unscreened or sanctioned counterparty.
 
-- **Contract (Bradbury, chain 4221):** `0xA6e727e14CEa667A75BF1586f10668C5c26c887f`
-- **Explorer:** https://explorer-bradbury.genlayer.com/contract/0xA6e727e14CEa667A75BF1586f10668C5c26c887f
+- **Contract (Bradbury, chain 4221):** `0xD682eD7cC2ce61FB14741aF3939b80707C91E478`
+- **Explorer:** https://explorer-bradbury.genlayer.com/contract/0xD682eD7cC2ce61FB14741aF3939b80707C91E478
 - **Live app:** https://compliancegateway.pages.dev
 
 ## What it does
